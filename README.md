@@ -1,4 +1,4 @@
-# vhdl_templates
+# vhdl_ip_cores
 Welcome to vhdl ip cores - your comprehensive collection of widely used IP cores! This repository aims to provide a diverse and extensive range of IP cores, enabling developers, engineers, and enthusiasts to leverage these proven designs for their projects. From essential communication protocols to computational modules and everything in between, we've gathered a curated selection of reliable IP cores to save you time and effort.
 
 By centralizing these IP cores in one place, our repository simplifies the process of integrating essential functionalities into your designs. Whether you're working on FPGA projects, SoC designs, or embedded systems, you'll find an array of high-quality IP cores that have been thoroughly tested and optimized.
