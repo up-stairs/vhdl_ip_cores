@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="tb_third_order_lagrange_interpolator_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="tb_third_order_lagrange_interpolator" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="1,317.073 ns"></ZoomStartTime>
+      <ZoomEndTime time="3,243.903 ns"></ZoomEndTime>
+      <Cursor1Time time="2,925.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="276"></NameColumnWidth>
+      <ValueColumnWidth column_width="92"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="25" />
+   <wave_markers>
+      <marker time="12285000" label="" />
+      <marker time="3325000" label="" />
+   </wave_markers>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/err_data_underrun" type="logic">
+      <obj_property name="ElementShortName">err_data_underrun</obj_property>
+      <obj_property name="ObjectShortName">err_data_underrun</obj_property>
+      <obj_property name="CustomSignalColor">#FF0000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/generate_new_sample" type="logic">
+      <obj_property name="ElementShortName">generate_new_sample</obj_property>
+      <obj_property name="ObjectShortName">generate_new_sample</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/s_axi_data_tvalid" type="logic">
+      <obj_property name="ElementShortName">s_axi_data_tvalid</obj_property>
+      <obj_property name="ObjectShortName">s_axi_data_tvalid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/s_axi_data_tready" type="logic">
+      <obj_property name="ElementShortName">s_axi_data_tready</obj_property>
+      <obj_property name="ObjectShortName">s_axi_data_tready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/s_axi_data_tdata" type="array">
+      <obj_property name="ElementShortName">s_axi_data_tdata[17:0]</obj_property>
+      <obj_property name="ObjectShortName">s_axi_data_tdata[17:0]</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+      <obj_property name="CellHeight">100</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/m_axi_data_tvalid" type="logic">
+      <obj_property name="ElementShortName">m_axi_data_tvalid</obj_property>
+      <obj_property name="ObjectShortName">m_axi_data_tvalid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/m_axi_data_tdata" type="array">
+      <obj_property name="ElementShortName">m_axi_data_tdata[17:0]</obj_property>
+      <obj_property name="ObjectShortName">m_axi_data_tdata[17:0]</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+      <obj_property name="CellHeight">100</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/node_up_zero" type="array">
+      <obj_property name="ElementShortName">node_up_zero[17:0]</obj_property>
+      <obj_property name="ObjectShortName">node_up_zero[17:0]</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+      <obj_property name="CellHeight">100</obj_property>
+      <obj_property name="AnalogYRangeMin">0.000000</obj_property>
+      <obj_property name="AnalogYRRangeMax">0.000000</obj_property>
+      <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
+      <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
+      <obj_property name="AnalogHorizLine">0.000000</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/node_up_one" type="array">
+      <obj_property name="ElementShortName">node_up_one[17:0]</obj_property>
+      <obj_property name="ObjectShortName">node_up_one[17:0]</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+      <obj_property name="CellHeight">100</obj_property>
+      <obj_property name="AnalogYRangeMin">0.000000</obj_property>
+      <obj_property name="AnalogYRRangeMax">0.000000</obj_property>
+      <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
+      <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
+      <obj_property name="AnalogHorizLine">0.000000</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/node_up_two" type="array">
+      <obj_property name="ElementShortName">node_up_two[17:0]</obj_property>
+      <obj_property name="ObjectShortName">node_up_two[17:0]</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+      <obj_property name="CellHeight">100</obj_property>
+      <obj_property name="AnalogYRangeMin">0.000000</obj_property>
+      <obj_property name="AnalogYRRangeMax">0.000000</obj_property>
+      <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
+      <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
+      <obj_property name="AnalogHorizLine">0.000000</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/node_dn_zero" type="array">
+      <obj_property name="ElementShortName">node_dn_zero[17:0]</obj_property>
+      <obj_property name="ObjectShortName">node_dn_zero[17:0]</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+      <obj_property name="CellHeight">100</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/node_dn_one" type="array">
+      <obj_property name="ElementShortName">node_dn_one[17:0]</obj_property>
+      <obj_property name="ObjectShortName">node_dn_one[17:0]</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+      <obj_property name="CellHeight">100</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/node_dn_two" type="array">
+      <obj_property name="ElementShortName">node_dn_two[17:0]</obj_property>
+      <obj_property name="ObjectShortName">node_dn_two[17:0]</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+      <obj_property name="CellHeight">100</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/clock" type="logic">
+      <obj_property name="ElementShortName">clock</obj_property>
+      <obj_property name="ObjectShortName">clock</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/reset" type="logic">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/sample_en" type="logic">
+      <obj_property name="ElementShortName">sample_en</obj_property>
+      <obj_property name="ObjectShortName">sample_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/clock_en" type="logic">
+      <obj_property name="ElementShortName">clock_en</obj_property>
+      <obj_property name="ObjectShortName">clock_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/data_in" type="array">
+      <obj_property name="ElementShortName">data_in[17:0]</obj_property>
+      <obj_property name="ObjectShortName">data_in[17:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/data_out" type="array">
+      <obj_property name="ElementShortName">data_out[17:0]</obj_property>
+      <obj_property name="ObjectShortName">data_out[17:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/data_in_mult" type="array">
+      <obj_property name="ElementShortName">data_in_mult[29:0]</obj_property>
+      <obj_property name="ObjectShortName">data_in_mult[29:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/data_mult_pre" type="array">
+      <obj_property name="ElementShortName">data_mult_pre[29:0]</obj_property>
+      <obj_property name="ObjectShortName">data_mult_pre[29:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/data_out_sig" type="array">
+      <obj_property name="ElementShortName">data_out_sig[29:0]</obj_property>
+      <obj_property name="ObjectShortName">data_out_sig[29:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/C_COE" type="other">
+      <obj_property name="ElementShortName">C_COE</obj_property>
+      <obj_property name="ObjectShortName">C_COE</obj_property>
+   </wvobject>
+   <wvobject fp_name="/tb_third_order_lagrange_interpolator/dut/i_mult_deriv_1/C_DATAW" type="other">
+      <obj_property name="ElementShortName">C_DATAW</obj_property>
+      <obj_property name="ObjectShortName">C_DATAW</obj_property>
+   </wvobject>
+</wave_config>
