@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 entity mult_add is
   generic (
     C_DATAW                 : natural range 18 downto 4;
-    C_MUW                   : natural range 18 downto 4;
+    C_MU_DATAW                   : natural range 18 downto 4;
     C_MU_FRACW              : natural range 14 downto 0; -- fractional part of mu
     C_DATA_TO_ADD_SDELAY    : natural;
     C_DATA_TO_ADD_CDELAY    : natural
@@ -16,7 +16,7 @@ entity mult_add is
     sample_en               : in std_logic;
     clock_en                : in std_logic;
 
-    mu_in                   : in std_logic_vector(C_MUW-1 downto 0);
+    mu_in                   : in std_logic_vector(C_MU_DATAW-1 downto 0);
     data_to_mult_in         : in std_logic_vector(C_DATAW-1 downto 0);
     data_to_add_in          : in std_logic_vector(C_DATAW-1 downto 0);
     data_out                : out std_logic_vector(C_DATAW-1 downto 0)
@@ -25,7 +25,6 @@ end mult_add;
 
 architecture rtl of mult_add is
   
-  signal mu_delayed           : std_logic_vector(C_MUW-1 downto 0);
   signal data_to_add_sdelayed : std_logic_vector(C_DATAW-1 downto 0);
   signal data_to_add_delayed  : std_logic_vector(C_DATAW-1 downto 0);
   signal data_x_mult          : signed(C_DATAW-1 downto 0);
@@ -61,7 +60,7 @@ begin
   
 
   process(clock, reset)
-    variable data_x_mult_v    : signed(C_MUW+C_DATAW-1 downto 0);
+    variable data_x_mult_v    : signed(C_MU_DATAW+C_DATAW-1 downto 0);
   begin
     if reset = '1' then
       data_x_mult   <= (others => '0');

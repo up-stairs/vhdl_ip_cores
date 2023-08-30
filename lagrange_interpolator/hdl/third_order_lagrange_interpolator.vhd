@@ -11,7 +11,7 @@ entity third_order_lagrange_interpolator is
     clock                   : in std_logic;
     reset                   : in std_logic;
 
-    s_cfg_interp_rate       : in std_logic_vector(31 downto 0); -- 1bit integer, 31bit fractional
+    s_cfg_interp_rate       : in std_logic_vector(31 downto 0); -- unsigned, 1 bit integer, 31 bit fractional - [0.000:1.000]
     s_axi_data_rate_pulse   : out std_logic; -- indicates the input data rate to the user
 
     s_axi_data_tvalid       : in std_logic;
@@ -31,8 +31,10 @@ end third_order_lagrange_interpolator;
 architecture rtl of third_order_lagrange_interpolator is
 
   constant C_MU_FRACW         : natural := 14;
-  constant C_MUW              : natural := 18;
-  constant C_MU_ACCW          : natural := 33;
+  constant C_MU_DATAW         : natural := 18;
+  constant C_MU_ACCW          : natural := s_cfg_interp_rate'length;
+
+  signal interp_rate_reg      : unsigned(s_cfg_interp_rate'range);
 
   signal get_input_sample     : std_logic;
   signal fifo_empty           : std_logic;
@@ -42,11 +44,11 @@ architecture rtl of third_order_lagrange_interpolator is
   signal mu_acc_msb_sig       : std_logic;
   signal mu_acc               : unsigned(C_MU_ACCW-1 downto 0);
   signal mu_acc_sig           : unsigned(C_MU_ACCW-1 downto 0);
-  signal mu_third             : std_logic_vector(C_MUW-1 downto 0);
-  signal mu_third_delayed     : std_logic_vector(C_MUW-1 downto 0);
-  signal mu_second            : std_logic_vector(C_MUW-1 downto 0);
-  signal mu_second_delayed    : std_logic_vector(C_MUW-1 downto 0);
-  signal mu_first             : std_logic_vector(C_MUW-1 downto 0);
+  signal mu_third             : std_logic_vector(C_MU_DATAW-1 downto 0);
+  signal mu_third_delayed     : std_logic_vector(C_MU_DATAW-1 downto 0);
+  signal mu_second            : std_logic_vector(C_MU_DATAW-1 downto 0);
+  signal mu_second_delayed    : std_logic_vector(C_MU_DATAW-1 downto 0);
+  signal mu_first             : std_logic_vector(C_MU_DATAW-1 downto 0);
 
   signal node_up_zero         : std_logic_vector(C_DATAW-1 downto 0);
   signal node_up_one          : std_logic_vector(C_DATAW-1 downto 0);
@@ -138,21 +140,36 @@ begin
   -----------------------------------------------
   -- MU PATH
   -----------------------------------------------
+  -- register s_cfg_interp_rate to improve timing performance
+  process(clock, reset)
+  begin
+    if reset = '1' then
+      interp_rate_reg   <= (others => '0');
+    elsif rising_edge(clock) then
+      if s_cfg_interp_rate(C_MU_ACCW-1) = '1' then
+        interp_rate_reg   <= (others => '0');
+        interp_rate_reg(C_MU_ACCW-1)   <= '1';
+      else  
+        interp_rate_reg   <= unsigned(s_cfg_interp_rate);
+    end if;
+    end if;
+  end process;
+  
   -- mu accumulator, the MSB bit is used to request new input sample
-  mu_acc_sig          <= mu_acc + unsigned(s_cfg_interp_rate);
-  mu_acc_msb_sig      <= mu_acc_sig(mu_acc_sig'left);
+  mu_acc_sig          <= mu_acc + interp_rate_reg;
+  mu_acc_msb_sig      <= mu_acc_sig(C_MU_ACCW-1);
 
   -- the distribution of delayed versions of mu
   process(clock, reset)
-    variable data_x_mult_v    : signed(C_MUW+C_DATAW-1 downto 0);
+    variable data_x_mult_v    : signed(C_MU_DATAW+C_DATAW-1 downto 0);
   begin
     if reset = '1' then
       mu_acc   <= (others => '0');
     elsif rising_edge(clock) then
       if (m_axi_data_treq = '1') then
-        mu_acc            <= resize(mu_acc_sig(31 downto 0), mu_acc'length);
+        mu_acc            <= resize(mu_acc_sig(C_MU_ACCW-2 downto 0), C_MU_ACCW);
 
-        mu_third          <= std_logic_vector(unsigned(mu_acc(31 downto 18)) + to_unsigned(2**C_MU_FRACW, mu_third'length));
+        mu_third          <= std_logic_vector(unsigned(mu_acc(C_MU_ACCW-2 downto C_MU_ACCW-C_MU_FRACW-1)) + to_unsigned(2**C_MU_FRACW, mu_third'length));
         mu_third_delayed  <= mu_third;
         mu_second         <= std_logic_vector(unsigned(mu_third_delayed) - to_unsigned(2**C_MU_FRACW, mu_third'length));
         mu_second_delayed <= mu_second;
@@ -168,7 +185,7 @@ begin
   i_mult_add_2 : entity work.mult_add
   generic map (
     C_DATAW             => C_DATAW,
-    C_MUW               => C_MUW,
+    C_MU_DATAW          => C_MU_DATAW,
     C_MU_FRACW          => C_MU_FRACW,
     C_DATA_TO_ADD_SDELAY => 1,
     C_DATA_TO_ADD_CDELAY => 2
@@ -188,7 +205,7 @@ begin
   i_mult_add_1 : entity work.mult_add
   generic map (
     C_DATAW             => C_DATAW,
-    C_MUW               => C_MUW,
+    C_MU_DATAW          => C_MU_DATAW,
     C_MU_FRACW          => C_MU_FRACW,
     C_DATA_TO_ADD_SDELAY => 2,
     C_DATA_TO_ADD_CDELAY => 4
@@ -208,7 +225,7 @@ begin
   i_mult_add_0 : entity work.mult_add
   generic map (
     C_DATAW             => C_DATAW,
-    C_MUW               => C_MUW,
+    C_MU_DATAW          => C_MU_DATAW,
     C_MU_FRACW          => C_MU_FRACW,
     C_DATA_TO_ADD_SDELAY => 3,
     C_DATA_TO_ADD_CDELAY => 6

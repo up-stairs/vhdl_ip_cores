@@ -43,17 +43,17 @@ function [y] = lagrange_newton_v3(x, r, layer)
     if (test == 1)
     node1_r = node1;
     endif
-    node1 = x(iy) - x_r
+    node1 = x(iy) - x_r;
 
     if (test == 1)
     node2_r = node2;
     endif
-    node2 = floor((node1 - node1_r)*(512/1024))
+    node2 = floor((node1 - node1_r)*(512/1024));
 
     if (test == 1)
     node3_r = node3;
     endif
-    node3 = floor((node2 - node2_r)*(341/1024))
+    node3 = floor((node2 - node2_r)*(341/1024));
 
     if (test == 1)
     node4_r = node4;

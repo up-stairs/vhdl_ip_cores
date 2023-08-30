@@ -61,12 +61,12 @@ architecture tb of tb_third_order_lagrange_interpolator is
   signal generate_new_sample    : std_logic;
 
   signal clock_en               : std_logic;
-  signal s_axi_data_rate_pulse         : std_logic;
-  signal s_cfg_interp_rate                : std_logic_vector (31 downto 0) := X"D1230760"; --std_logic_vector(to_unsigned(2**32-1, 32));
+  signal s_axi_data_rate_pulse  : std_logic;
+  signal s_cfg_interp_rate      : std_logic_vector (31 downto 0) := X"21230760"; --std_logic_vector(to_unsigned(2**32-1, 32));
   signal s_axi_data_tvalid      : std_logic;
   signal s_axi_data_tready      : std_logic;
   signal s_axi_data_tdata       : std_logic_vector (C_DATA_WIDTH-1 downto 0);
-  signal m_axi_data_treq      : std_logic;
+  signal m_axi_data_treq        : std_logic;
   signal m_axi_data_tdata       : std_logic_vector (C_DATA_WIDTH-1 downto 0);
   signal err_enable             : std_logic;
   signal err_data_underrun      : std_logic;
