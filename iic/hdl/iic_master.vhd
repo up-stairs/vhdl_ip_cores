@@ -45,8 +45,10 @@ architecture str of iic_master is
 
   constant C_TYPE_START         : std_logic_vector(s_xfer_ttype'range) := 1;
   constant C_TYPE_WRITE         : std_logic_vector(s_xfer_ttype'range) := 2;
+  constant C_TYPE_WRITE_N_END   : std_logic_vector(s_xfer_ttype'range) := 2;
   constant C_TYPE_READ          : std_logic_vector(s_xfer_ttype'range) := 3;
-  constant C_TYPE_END           : std_logic_vector(s_xfer_ttype'range) := 4;
+  constant C_TYPE_READNOACK     : std_logic_vector(s_xfer_ttype'range) := 4;
+  constant C_TYPE_END           : std_logic_vector(s_xfer_ttype'range) := 5;
   
   constant C_SDA_START          : std_logic_vector(0 to 1) := "00";
   constant C_SCL_START          : std_logic_vector(0 to 1) := "10";
@@ -168,9 +170,17 @@ begin
                 iic_master_state    <= XEND_ST;
                 s_xfer_tready_sig   <= '0';
               when C_TYPE_WRITE =>
-                iic_master_state    <= XWRITE_ST;
+                iic_master_state    <= XWRITE0_ST;
                 s_xfer_tready_sig   <= '0';
                 st_write_data       <= s_xfer_tdata;
+              when C_TYPE_READ =>
+                iic_master_state    <= XREAD0_ST;
+                s_xfer_tready_sig   <= '0';
+                st_send_ack         <= '1';
+              when C_TYPE_READNOACK =>
+                iic_master_state    <= XREAD0_ST;
+                s_xfer_tready_sig   <= '0';
+                st_send_ack         <= '0';
               when others =>
                 iic_master_state <= IDLE_ST;
             end case;
@@ -200,14 +210,27 @@ begin
           end if;
         when XWRITE1_ST =>
           -- checking the status of SCL because the SLAVE might be stretching the CLK
-          if (iic_scl_r2 = '1' and iic_scl_r3 = '0') then
+          if (clk_pulse = '1' and iic_scl_r2 = '1') then
             st_iic_cntr   <= st_iic_cntr + 1;
-          end if;
-          if (clk_pulse = '1' and iic_scl_r3 = '1') then
-            if (st_iic_cntr = 9) then
+            if (st_iic_cntr >= 8) then
               iic_master_state    <= WAIT_ST;
             else
               iic_master_state    <= XWRITE0_ST;
+            end if;
+          end if;
+          
+        when XREAD0_ST =>
+          if (clk_pulse = '1') then
+            iic_master_state    <= XREAD1_ST;
+          end if;
+        when XREAD1_ST =>
+          -- checking the status of SCL because the SLAVE might be stretching the CLK
+          if (clk_pulse = '1' and iic_scl_r2 = '1') then
+            st_iic_cntr   <= st_iic_cntr + 1;
+            if (st_iic_cntr >= 8) then
+              iic_master_state    <= WAIT_ST;
+            else
+              iic_master_state    <= XREAD0_ST;
             end if;
           end if;
           
@@ -258,7 +281,7 @@ begin
           end if;
           
         when XWRITE0_ST =>
-          if (st_iic_cntr <= 7) then
+          if (st_iic_cntr < 8) then
             iic_sda_t       <= st_write_data(st_iic_cntr);
           else
             iic_sda_t       <= C_TRISTATE;
@@ -267,10 +290,29 @@ begin
             iic_scl_t       <= C_TRISTATE;
           end if;
         when XWRITE1_ST =>
-          if (clk_pulse = '1' and iic_scl_r3 = '1') then
+          if (clk_pulse = '1' and iic_scl_r2 = '1') then
             -- get the write ack result
-            if (st_iic_cntr = 9) then
+            if (st_iic_cntr >= 8) then
               err_no_ack      <= iic_sda_r2;
+            end if;
+            iic_scl_t       <= C_DRIVELOW;
+          end if;
+          
+        when XREAD0_ST =>
+          -- send acknowledge
+          if (st_iic_cntr >= 8 and st_send_ack = '1') then
+            iic_sda_t       <= C_DRIVELOW;
+          else
+            iic_sda_t       <= C_TRISTATE;
+          end if;
+          if (clk_pulse = '1') then
+            iic_scl_t       <= C_TRISTATE;
+          end if;
+        when XREAD1_ST =>
+          if (clk_pulse = '1' and iic_scl_r2 = '1') then
+            -- get the value of SDA
+            if (st_iic_cntr < 8) then
+              st_read_data(st_iic_cntr) <= iic_sda_r2;
             end if;
             iic_scl_t       <= C_DRIVELOW;
           end if;
