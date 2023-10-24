@@ -40,15 +40,22 @@ architecture str of iic_master is
   -- Type definitions
   type t_STATE is (
     IDLE_ST,
-    XFER_ST
+    WAIT_ST,
+    XSTART_ST,
+    XREPSTART_ST,
+    XEND_ST,
+    XWRITE0_ST,
+    XWRITE1_ST,
+    XREAD0_ST,
+    XREAD1_ST
   );
 
-  constant C_TYPE_START         : std_logic_vector(s_xfer_ttype'range) := 1;
-  constant C_TYPE_WRITE         : std_logic_vector(s_xfer_ttype'range) := 2;
-  constant C_TYPE_WRITE_N_END   : std_logic_vector(s_xfer_ttype'range) := 2;
-  constant C_TYPE_READ          : std_logic_vector(s_xfer_ttype'range) := 3;
-  constant C_TYPE_READNOACK     : std_logic_vector(s_xfer_ttype'range) := 4;
-  constant C_TYPE_END           : std_logic_vector(s_xfer_ttype'range) := 5;
+  constant C_TYPE_START         : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(1, s_xfer_ttype'length));
+  constant C_TYPE_WRITE         : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(2, s_xfer_ttype'length));
+  -- constant C_TYPE_WRITE_N_END   : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(3, s_xfer_ttype'length); -- TODO
+  constant C_TYPE_READ          : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(4, s_xfer_ttype'length));
+  constant C_TYPE_READNOACK     : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(5, s_xfer_ttype'length));
+  constant C_TYPE_END           : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(6, s_xfer_ttype'length));
   
   constant C_SDA_START          : std_logic_vector(0 to 1) := "00";
   constant C_SCL_START          : std_logic_vector(0 to 1) := "10";
@@ -65,6 +72,10 @@ architecture str of iic_master is
   signal iic_scl_t              : std_logic;
   signal iic_sda_i              : std_logic;
   signal iic_sda_t              : std_logic;
+  signal iic_scl_r1             : std_logic;
+  signal iic_scl_r2             : std_logic;
+  signal iic_sda_r1             : std_logic;
+  signal iic_sda_r2             : std_logic;
   
   signal s_xfer_tready_sig      : std_logic;
   
@@ -73,9 +84,11 @@ architecture str of iic_master is
   signal clk_period_cntr        : unsigned(s_xfer_tperiod'range);
   
   signal iic_master_state       : t_STATE;
-  signal st_sym_cntr            : natural range 0 to 15;
+  signal st_iic_cntr            : natural range 0 to 15;
   signal st_write_data          : std_logic_vector(0 to 7); 
   signal st_read_data           : std_logic_vector(0 to 7); 
+  signal st_read_valid          : std_logic;
+  signal st_send_ack            : std_logic;
 
 begin
 
@@ -87,19 +100,19 @@ begin
   iic_sda_i       <= iic_sda;
   iic_scl_i       <= iic_scl;
 
-  register iic output signals the create a setup and hold delay
+  -- register iic output signals the create a setup and hold delay
   process (clock, reset)
   begin
     if reset = '1' then
       iic_scl_r1  <= C_TRISTATE;
       iic_scl_r2  <= C_TRISTATE;
-      iic_scl_r3  <= C_TRISTATE;
+      -- iic_scl_r3  <= C_TRISTATE;
       iic_sda_r1  <= C_TRISTATE;
       iic_sda_r2  <= C_TRISTATE;
     elsif rising_edge(clock) then
       iic_scl_r1  <= iic_scl_i;
       iic_scl_r2  <= iic_scl_r1;
-      iic_scl_r3  <= iic_scl_r2;
+      -- iic_scl_r3  <= iic_scl_r2;
       iic_sda_r1  <= iic_sda_i;
       iic_sda_r2  <= iic_sda_r1;
     end if;
@@ -134,7 +147,7 @@ begin
     end if;
   end process;
   
-  -- Main process for SPI functionality
+  -- Main process for IIC functionality
   process (clock, reset)
   begin
     if reset = '1' then
@@ -256,7 +269,9 @@ begin
       iic_sda_t       <= C_TRISTATE;
       iic_scl_t       <= C_TRISTATE;
       err_no_ack      <= '0';
+      st_read_valid   <= '0';
     elsif rising_edge(clock) then
+      st_read_valid   <= '0';
       case iic_master_state is
         when IDLE_ST =>
           iic_sda_t       <= C_TRISTATE;
@@ -313,27 +328,27 @@ begin
             -- get the value of SDA
             if (st_iic_cntr < 8) then
               st_read_data(st_iic_cntr) <= iic_sda_r2;
+              st_read_valid   <= '1';
             end if;
             iic_scl_t       <= C_DRIVELOW;
           end if;
           
         when others =>
-          -- Handle other states (should not occur in this code)
           null;
       end case;
     end if;
   end process;
   
   -- register iic output signals the create a setup and hold delay
-  -- process (clock, reset)
-  -- begin
-    -- if reset = '1' then
-      -- iic_sda_r1_t  <= C_TRISTATE;
-      -- iic_scl_r1_t  <= C_TRISTATE;
-    -- elsif rising_edge(clock) then
-      -- iic_sda_r1_t  <= iic_sda_t;
-      -- iic_scl_r1_t  <= iic_scl_t;
-    -- end if;
-  -- end process;
+  process (clock, reset)
+  begin
+    if reset = '1' then
+      m_data_tvalid   <= '0';
+      m_data_tdata    <= (others => '0');
+    elsif rising_edge(clock) then
+      m_data_tvalid   <= st_read_valid;
+      m_data_tdata    <= st_read_data;
+    end if;
+  end process;
 
 end str;
