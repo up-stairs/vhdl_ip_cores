@@ -317,9 +317,10 @@ begin
         when XREAD1_ST =>
           if (clk_pulse = '1' and iic_scl_r2 = '1') then
             -- get the value of SDA
-            if (st_iic_cntr < 8) then
-              st_read_data(st_iic_cntr) <= iic_sda_r2;
+            if (st_iic_cntr >= 8) then
               st_read_valid   <= '1';
+            else
+              st_read_data(st_iic_cntr) <= iic_sda_r2;
             end if;
             iic_scl_o       <= '0';
           end if;
@@ -337,8 +338,11 @@ begin
       m_data_tvalid   <= '0';
       m_data_tdata    <= (others => '0');
     elsif rising_edge(clock) then
-      m_data_tvalid   <= st_read_valid;
-      m_data_tdata    <= st_read_data;
+      m_data_tvalid   <= '0';
+      if (st_read_valid = '1') then
+        m_data_tvalid   <= '1';
+        m_data_tdata    <= st_read_data;
+      end if;
     end if;
   end process;
 
