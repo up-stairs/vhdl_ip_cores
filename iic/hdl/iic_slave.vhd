@@ -190,7 +190,7 @@ begin
               else -- its time the IIC Master ACKnowledge to ACK Slave
               end if;
               -- all data is sent, so it is time get ACK
-              if (st_sym_cntr >= 8) then
+              if (st_sym_cntr >= 7) then
                 iic_slave_state   <= XGETACK_ST;
               end if;
             end if;
@@ -201,6 +201,9 @@ begin
               -- SDI = '0' means the IIC Master is acknowledging the Slave
               m_xfer_tack     <= not(iic_sda_r1); -- it assumed that the SDA line is stable at this moment
               m_xfer_tnoack   <= iic_sda_r1; -- it assumed that the SDA line is stable at this moment
+            end if;
+            -- detect falling edge of SCL to drive the SDA line
+            if (iic_scl_r2 = '0' and iic_scl_r3 = '1') then
               iic_slave_state     <= XREAD_ST;
             end if;
             
@@ -216,7 +219,7 @@ begin
   end process;
   
   iic_sda_o       <= '0' when iic_slave_state = XSENDACK_ST else
-                     '0' when iic_slave_state = XREAD_ST and st_iic_read_data(15) = '0' else
+                     '0' when iic_slave_state = XREAD_ST and st_iic_read_data(31) = '0' else
                      '1';
   
   
