@@ -40,6 +40,19 @@ architecture tb_arch of tb_iic is
   signal clock         : std_logic;
   signal reset         : std_logic;
 
+  type T_XFER_TYPE_VECTOR is array(integer range <>) of std_logic_vector(2 downto 0);
+  constant C_XFER_TYPE_VECTOR     : T_XFER_TYPE_VECTOR(0 to 15) := (
+    C_TYPE_START,
+    C_TYPE_WRITE,
+    C_TYPE_WRITE,
+    C_TYPE_START,
+    C_TYPE_WRITE,
+    C_TYPE_READ,
+    C_TYPE_READ,
+    C_TYPE_READ,
+    C_TYPE_READNOACK,
+    others => "000"
+  );
 
   signal master_sda_i             : std_logic;
   signal master_sda_o             : std_logic;
@@ -64,6 +77,7 @@ architecture tb_arch of tb_iic is
   signal iics_m_xfer_tstatus      : std_logic;
   signal iics_m_xfer_tack         : std_logic;
   signal iics_m_xfer_tnoack       : std_logic;
+  
 
   constant CPERIOD            : time := 10 ns;
   
@@ -89,8 +103,10 @@ begin
   
   process
     variable modcod_v   : integer;
+    variable xfer_cntr   : integer;
   begin
-    iicm_s_xfer_tvalid   <= '0';
+    iicm_s_xfer_tvalid    <= '0';
+    xfer_cntr             := 0;
     wait until falling_edge(reset);
     
     while (true) loop
@@ -101,15 +117,19 @@ begin
         wait for CPERIOD/10;
         iicm_s_xfer_tvalid    <= '1';
         
-        if (iicm_s_xfer_ttype = C_TYPE_START) then
-          iicm_s_xfer_ttype     <= C_TYPE_WRITE;
-        elsif (iicm_s_xfer_ttype = C_TYPE_WRITE) then
-          iicm_s_xfer_ttype     <= C_TYPE_END;
+        iicm_s_xfer_ttype   <= C_XFER_TYPE_VECTOR(xfer_cntr);
+        
+        if (C_XFER_TYPE_VECTOR(xfer_cntr) = C_TYPE_WRITE) then
           modcod_v := randi(0, 2**30-1);
           iicm_s_xfer_tdata    <= std_logic_vector(to_unsigned(modcod_v, iicm_s_xfer_tdata'length));
-        else
-          iicm_s_xfer_ttype     <= C_TYPE_START;
+          if (C_XFER_TYPE_VECTOR(xfer_cntr+1) = C_TYPE_READ) then
+            iicm_s_xfer_tdata(0)    <= '1';
+          else
+            iicm_s_xfer_tdata(0)    <= '0';
+          end if;
         end if;
+        
+        xfer_cntr := xfer_cntr + 1;
       
         wait for CPERIOD;
         iicm_s_xfer_tvalid   <= '0';
