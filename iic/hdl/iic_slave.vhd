@@ -58,7 +58,7 @@ architecture str of iic_slave is
   signal iic_slave_state       : t_STATE;
   signal st_sym_cntr           : natural range 15 downto 0;
   -- signal st_sym_cntr           : unsigned(UNSIGNED_NUM_BITS(C_SERIAL_DATA_W) downto 0);
-  signal st_rcvd_data          : std_logic_vector(m_data_tdata'range);
+  signal st_rcvd_data          : std_logic_vector(0 to 7);
   signal st_rcvd_valid         : std_logic;
   signal st_dev_addr           : std_logic;
   
@@ -118,6 +118,7 @@ begin
       --------------------------------------------------
       -- detect END condition
       elsif (iic_sda_r3 = '0' and iic_sda_r2 = '1' and iic_scl_r3 = '1' and iic_scl_r2 = '1') then 
+        st_sym_cntr     <= 0;
         iic_slave_state <= IDLE_ST;
       --------------------------------------------------
       
@@ -151,6 +152,7 @@ begin
           -- IIC Write ACKnowledge (IIC Slave acknowledges the IIC Master)
           --------------------------------------------------
           when XSENDACK_ST =>
+            st_sym_cntr     <= 0;
             -- detect falling edge of SCL to drive the SDA line
             if (iic_scl_r2 = '0' and iic_scl_r3 = '1') then
               -- check it is the first BYTE of the transfer
@@ -193,6 +195,7 @@ begin
               end if;
             end if;
           when XGETACK_ST =>
+            st_sym_cntr     <= 0;
             -- detect rising edge of SCL before reading SDI line
             if (iic_scl_r2 = '1' and iic_scl_r3 = '0') then
               -- SDI = '0' means the IIC Master is acknowledging the Slave
