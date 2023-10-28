@@ -41,12 +41,19 @@ architecture tb_arch of tb_iic is
   signal reset         : std_logic;
 
 
-  signal iic_sda                  : std_logic;
-  signal iic_scl                  : std_logic;
+  signal master_sda_i             : std_logic;
+  signal master_sda_o             : std_logic;
+  signal master_scl_i             : std_logic;
+  signal master_scl_o             : std_logic;
+  signal slave_sda_i              : std_logic;
+  signal slave_sda_o              : std_logic;
+  signal slave_scl_i              : std_logic;
+  signal slave_scl_o              : std_logic;
+    
   signal iicm_s_xfer_tvalid       : std_logic;
   signal iicm_s_xfer_tready       : std_logic;
   signal iicm_s_xfer_tdata        : std_logic_vector(7 downto 0);
-  signal iicm_s_xfer_tperiod      : std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(5, 8));
+  signal iicm_s_xfer_tperiod      : std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(10, 8));
   signal iicm_m_xfer_tstatus      : std_logic;
   signal iicm_m_data_tvalid       : std_logic;
   signal iicm_m_data_tdata        : std_logic_vector(7 downto 0);
@@ -119,8 +126,10 @@ begin
       clock               => clock,
       reset               => reset,
       
-      iic_sda             => iic_sda,
-      iic_scl             => iic_scl,
+      iic_sda_i           => master_sda_i,
+      iic_scl_i           => master_scl_i,
+      iic_sda_o           => master_sda_o,
+      iic_scl_o           => master_scl_o,
       
       s_xfer_tvalid       => iicm_s_xfer_tvalid  ,     
       s_xfer_tready       => iicm_s_xfer_tready  ,     
@@ -134,8 +143,10 @@ begin
       err_no_ack          => err_no_ack
     );
     
-  iic_sda   <= '1' when iic_sda = 'Z' else iic_sda;
-  -- iic_scl   <= '1' when iic_scl = 'Z' else iic_scl;
+  master_sda_i    <= master_sda_o and slave_sda_o;
+  slave_sda_i     <= master_sda_i;
+  master_scl_i    <= master_scl_o and slave_scl_o;
+  slave_scl_i     <= master_scl_i;
 
 
   dut_iic_slave : entity work.iic_slave
@@ -143,8 +154,10 @@ begin
       clock               => clock,
       reset               => reset,
       
-      iic_sda             => iic_sda,
-      iic_scl             => iic_scl,
+      iic_sda_i           => slave_sda_i,
+      iic_scl_i           => slave_scl_i,
+      iic_sda_o           => slave_sda_o,
+      iic_scl_o           => slave_scl_o,
       
       m_xfer_tstatus      => iics_m_xfer_tstatus ,     
       m_xfer_tack         => iics_m_xfer_tack ,     
