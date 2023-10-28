@@ -8,15 +8,16 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity iic_master is
-  generic (
-    C_SERIAL_DATA_W : natural := 16
-  );
   port (
     clock               : in std_logic;
     reset               : in std_logic;
     
-    iic_sda             : inout std_logic;
-    iic_scl             : inout std_logic;
+    iic_sda_i           : in std_logic;
+    -- iic_sda_o           : out std_logic;
+    iic_sda_o           : out std_logic;
+    iic_scl_i           : in std_logic;
+    -- iic_scl_o           : out std_logic;
+    iic_scl_o           : out std_logic;
     
     s_xfer_tvalid       : in std_logic; -- tells the module to start a new iic transfer. a transfer starts when s_xfer_tvalid and s_xfer_tready are both ACTIVE (1)
     s_xfer_tready       : out std_logic; -- the modules output stating that it is ready for a new transfer. 
@@ -50,6 +51,7 @@ architecture str of iic_master is
     XREAD1_ST
   );
 
+  -- command types supported by the entity
   constant C_TYPE_START         : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(1, s_xfer_ttype'length));
   constant C_TYPE_WRITE         : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(2, s_xfer_ttype'length));
   -- constant C_TYPE_WRITE_N_END   : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(3, s_xfer_ttype'length); -- TODO
@@ -57,21 +59,15 @@ architecture str of iic_master is
   constant C_TYPE_READNOACK     : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(5, s_xfer_ttype'length));
   constant C_TYPE_END           : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(6, s_xfer_ttype'length));
   
+  -- SDA and SCL vector behaviors depending on the command type
   constant C_SDA_START          : std_logic_vector(0 to 1) := "00";
   constant C_SCL_START          : std_logic_vector(0 to 1) := "10";
   constant C_SDA_REPSTART       : std_logic_vector(0 to 3) := "1100";
   constant C_SCL_REPSTART       : std_logic_vector(0 to 3) := "0110";
   constant C_SDA_END            : std_logic_vector(0 to 1) := "01";
   constant C_SCL_END            : std_logic_vector(0 to 1) := "11";
-  
-  constant C_TRISTATE           : std_logic := '1';
-  constant C_DRIVELOW           : std_logic := not C_TRISTATE;
 
   -- Signal definitions
-  signal iic_scl_i              : std_logic;
-  signal iic_scl_t              : std_logic;
-  signal iic_sda_i              : std_logic;
-  signal iic_sda_t              : std_logic;
   signal iic_scl_r1             : std_logic;
   signal iic_scl_r2             : std_logic;
   signal iic_sda_r1             : std_logic;
@@ -93,22 +89,16 @@ architecture str of iic_master is
 begin
 
   s_xfer_tready   <= s_xfer_tready_sig;
-  
-  iic_sda         <= '0'      when iic_sda_t = C_DRIVELOW else 'Z';
-  iic_scl         <= '0'      when iic_scl_t = C_DRIVELOW else 'Z';
-  
-  iic_sda_i       <= iic_sda;
-  iic_scl_i       <= iic_scl;
 
   -- register iic output signals the create a setup and hold delay
   process (clock, reset)
   begin
     if reset = '1' then
-      iic_scl_r1  <= C_TRISTATE;
-      iic_scl_r2  <= C_TRISTATE;
-      -- iic_scl_r3  <= C_TRISTATE;
-      iic_sda_r1  <= C_TRISTATE;
-      iic_sda_r2  <= C_TRISTATE;
+      iic_scl_r1  <= '1';
+      iic_scl_r2  <= '1';
+      -- iic_scl_r3  <= '1';
+      iic_sda_r1  <= '1';
+      iic_sda_r2  <= '1';
     elsif rising_edge(clock) then
       iic_scl_r1  <= iic_scl_i;
       iic_scl_r2  <= iic_scl_r1;
@@ -159,6 +149,7 @@ begin
       
       case iic_master_state is
         when IDLE_ST =>
+          st_iic_cntr   <= 0;
             -- check for s_xfer_tvalid signal
           if (s_xfer_tvalid = '1' and s_xfer_tready_sig = '1') then
             -- leave this state only with IIC START request
@@ -266,43 +257,43 @@ begin
   process (clock, reset)
   begin
     if reset = '1' then
-      iic_sda_t       <= C_TRISTATE;
-      iic_scl_t       <= C_TRISTATE;
+      iic_sda_o       <= '1';
+      iic_scl_o       <= '1';
       err_no_ack      <= '0';
       st_read_valid   <= '0';
     elsif rising_edge(clock) then
       st_read_valid   <= '0';
       case iic_master_state is
         when IDLE_ST =>
-          iic_sda_t       <= C_TRISTATE;
-          iic_scl_t       <= C_TRISTATE;
+          iic_sda_o       <= '1';
+          iic_scl_o       <= '1';
           
         when XSTART_ST =>
           if (clk_pulse = '1') then
-            iic_sda_t       <= C_SDA_START(st_iic_cntr);
-            iic_scl_t       <= C_SCL_START(st_iic_cntr);
+            iic_sda_o       <= C_SDA_START(st_iic_cntr);
+            iic_scl_o       <= C_SCL_START(st_iic_cntr);
           end if;
           
         when XREPSTART_ST =>
           if (clk_pulse = '1') then
-            iic_sda_t       <= C_SDA_REPSTART(st_iic_cntr);
-            iic_scl_t       <= C_SCL_REPSTART(st_iic_cntr);
+            iic_sda_o       <= C_SDA_REPSTART(st_iic_cntr);
+            iic_scl_o       <= C_SCL_REPSTART(st_iic_cntr);
           end if;
           
         when XEND_ST =>
           if (clk_pulse = '1') then
-            iic_sda_t       <= C_SDA_END(st_iic_cntr);
-            iic_scl_t       <= C_SCL_END(st_iic_cntr);
+            iic_sda_o       <= C_SDA_END(st_iic_cntr);
+            iic_scl_o       <= C_SCL_END(st_iic_cntr);
           end if;
           
         when XWRITE0_ST =>
           if (st_iic_cntr < 8) then
-            iic_sda_t       <= st_write_data(st_iic_cntr);
+            iic_sda_o       <= st_write_data(st_iic_cntr);
           else
-            iic_sda_t       <= C_TRISTATE;
+            iic_sda_o       <= '1';
           end if;
           if (clk_pulse = '1') then
-            iic_scl_t       <= C_TRISTATE;
+            iic_scl_o       <= '1';
           end if;
         when XWRITE1_ST =>
           if (clk_pulse = '1' and iic_scl_r2 = '1') then
@@ -310,18 +301,18 @@ begin
             if (st_iic_cntr >= 8) then
               err_no_ack      <= iic_sda_r2;
             end if;
-            iic_scl_t       <= C_DRIVELOW;
+            iic_scl_o       <= '0';
           end if;
           
         when XREAD0_ST =>
           -- send acknowledge
           if (st_iic_cntr >= 8 and st_send_ack = '1') then
-            iic_sda_t       <= C_DRIVELOW;
+            iic_sda_o       <= '0';
           else
-            iic_sda_t       <= C_TRISTATE;
+            iic_sda_o       <= '1';
           end if;
           if (clk_pulse = '1') then
-            iic_scl_t       <= C_TRISTATE;
+            iic_scl_o       <= '1';
           end if;
         when XREAD1_ST =>
           if (clk_pulse = '1' and iic_scl_r2 = '1') then
@@ -330,7 +321,7 @@ begin
               st_read_data(st_iic_cntr) <= iic_sda_r2;
               st_read_valid   <= '1';
             end if;
-            iic_scl_t       <= C_DRIVELOW;
+            iic_scl_o       <= '0';
           end if;
           
         when others =>
