@@ -60,12 +60,12 @@ architecture str of iic_master is
   constant C_TYPE_END           : std_logic_vector(s_xfer_ttype'range) := std_logic_vector(to_unsigned(6, s_xfer_ttype'length));
   
   -- SDA and SCL vector behaviors depending on the command type
-  constant C_SDA_START          : std_logic_vector(0 to 1) := "00";
-  constant C_SCL_START          : std_logic_vector(0 to 1) := "10";
+  constant C_SDA_START          : std_logic_vector(0 to 2) := "100";
+  constant C_SCL_START          : std_logic_vector(0 to 2) := "110";
   constant C_SDA_REPSTART       : std_logic_vector(0 to 3) := "1100";
   constant C_SCL_REPSTART       : std_logic_vector(0 to 3) := "0110";
-  constant C_SDA_END            : std_logic_vector(0 to 1) := "01";
-  constant C_SCL_END            : std_logic_vector(0 to 1) := "11";
+  constant C_SDA_END            : std_logic_vector(0 to 2) := "001";
+  constant C_SCL_END            : std_logic_vector(0 to 2) := "011";
 
   -- Signal definitions
   signal iic_scl_r1             : std_logic;
@@ -195,7 +195,7 @@ begin
         when XSTART_ST =>
           if (clk_pulse = '1') then
             st_iic_cntr   <= st_iic_cntr + 1;
-            if (st_iic_cntr = 1) then
+            if (st_iic_cntr = 2) then
               iic_master_state    <= WAIT_ST;
             end if;
           end if;
@@ -241,7 +241,7 @@ begin
         when XEND_ST =>
           if (clk_pulse = '1') then
             st_iic_cntr   <= st_iic_cntr + 1;
-            if (st_iic_cntr = 1) then
+            if (st_iic_cntr = 2) then
               iic_master_state    <= IDLE_ST;
             end if;
           end if;
@@ -287,9 +287,9 @@ begin
           end if;
           
         when XWRITE0_ST =>
-          if (st_iic_cntr < 8) then
+          if (st_iic_cntr < 8) then -- send the data through SDA line
             iic_sda_o       <= st_write_data(st_iic_cntr);
-          else
+          else -- wait for slave to acknowledge the write operation
             iic_sda_o       <= '1';
           end if;
           if (clk_pulse = '1') then
