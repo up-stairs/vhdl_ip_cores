@@ -97,8 +97,6 @@ begin
       iicm_s_xfer_tvalid   <= '0';
       
       if (iicm_s_xfer_tready = '1') then
-        modcod_v := randi(0, 2**30-1);
-        iicm_s_xfer_tdata    <= std_logic_vector(to_unsigned(modcod_v, iicm_s_xfer_tdata'length));
         
         wait for CPERIOD/10;
         iicm_s_xfer_tvalid    <= '1';
@@ -107,6 +105,8 @@ begin
           iicm_s_xfer_ttype     <= C_TYPE_WRITE;
         elsif (iicm_s_xfer_ttype = C_TYPE_WRITE) then
           iicm_s_xfer_ttype     <= C_TYPE_END;
+          modcod_v := randi(0, 2**30-1);
+          iicm_s_xfer_tdata    <= std_logic_vector(to_unsigned(modcod_v, iicm_s_xfer_tdata'length));
         else
           iicm_s_xfer_ttype     <= C_TYPE_START;
         end if;
