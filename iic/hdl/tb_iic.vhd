@@ -41,7 +41,8 @@ architecture tb_arch of tb_iic is
   signal reset         : std_logic;
 
   type T_XFER_TYPE_VECTOR is array(integer range <>) of std_logic_vector(2 downto 0);
-  constant C_XFER_TYPE_VECTOR     : T_XFER_TYPE_VECTOR(0 to 15) := (
+  constant C_XFER_TYPE_VECTOR     : T_XFER_TYPE_VECTOR(0 to 49) := (
+    -- a typical page read from eeprom
     C_TYPE_START,
     C_TYPE_WRITE,
     C_TYPE_WRITE,
@@ -51,6 +52,22 @@ architecture tb_arch of tb_iic is
     C_TYPE_READ,
     C_TYPE_READ,
     C_TYPE_READNOACK,
+    "000",
+    "000",
+    -- a typical random write to eeprom
+    C_TYPE_START,
+    C_TYPE_WRITE,
+    C_TYPE_WRITE,
+    C_TYPE_WRITE,
+    C_TYPE_END,
+    "000",
+    "000",
+    -- a typical random read from eeprom
+    C_TYPE_START,
+    C_TYPE_WRITE,
+    C_TYPE_READ,
+    C_TYPE_READ,
+    C_TYPE_END,
     others => "000"
   );
 
