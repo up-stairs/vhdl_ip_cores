@@ -1,3 +1,9 @@
+
+--------------------------------------------------------------------
+--========== https://github.com/up-stairs/vhdl_ip_cores ==========--
+--------------------------------------------------------------------
+
+
 -- Overall, the code implements a functional UART transmitter module that can receive data to be transmitted,
 -- generate start/stop bits, calculate and transmit parity bit, and control the timing of the transmission using a timer pulse generator.
 

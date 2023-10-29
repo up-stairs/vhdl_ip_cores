@@ -1,3 +1,8 @@
+
+--------------------------------------------------------------------
+--========== https://github.com/up-stairs/vhdl_ip_cores ==========--
+--------------------------------------------------------------------
+
 -- The code uses basic arithmetic operations and comparisons to approximate the complex absolute value 
 -- without directly using square root or square operations. 
 -- The approximation involves finding the maximum and minimum absolute values, applying specific weights, 

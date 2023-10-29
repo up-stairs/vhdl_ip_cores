@@ -1,3 +1,8 @@
+
+--------------------------------------------------------------------
+--========== https://github.com/up-stairs/vhdl_ip_cores ==========--
+--------------------------------------------------------------------
+
 -- The code is a FIFO implementation in VHDL with the option to choose between two modes: normal mode and First Word Fall Through (FWFT) mode. 
 -- It includes read and write processes, as well as data count tracking and control signals for full and empty conditions. 
 -- The code also handles the special case of the first read in FWFT mode.
