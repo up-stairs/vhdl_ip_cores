@@ -2,6 +2,8 @@
 --------------------------------------------------------------------
 --========== https://github.com/up-stairs/vhdl_ip_cores ==========--
 --------------------------------------------------------------------
+-- supports clock strecthing
+
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,6 +26,7 @@ entity iic_master is
     s_xfer_ttype        : in std_logic_vector(2 downto 0); -- transfer type (see the constant within the module). sampled by the module when s_xfer_tvalid and s_xfer_tready are both ACTIVE (1)
     s_xfer_tdata        : in std_logic_vector(7 downto 0); -- data to be transferred to the slave. sampled by the module when s_xfer_tvalid and s_xfer_tready are both ACTIVE (1)
     s_xfer_tperiod      : in std_logic_vector(7 downto 0); -- defines the IIC clock period. sampled by the module when s_xfer_tvalid and s_xfer_tready are both ACTIVE (1)
+                                                           -- values lower than 10 are ignored
     
     m_xfer_tstatus      : out std_logic; -- signal indicating that an active iic transaction is active or not 
                                          -- goes to ACTIVE (1) after a START condition and to PASSIVE (0) after an END condition
@@ -118,18 +121,19 @@ begin
     elsif rising_edge(clock) then
       clk_pulse       <= '0';
       if (iic_master_state = IDLE_ST or iic_master_state = WAIT_ST) then
+        -- restart clock counter in idle states
         clk_period_cntr   <= (others => '0');
         if (s_xfer_tvalid = '1' and s_xfer_tready_sig = '1') then
           clk_period_reg    <= unsigned(s_xfer_tperiod);
         end if;
       else
         -- the frequency of SCL must be at least half of or even lower than the frequency of clk
-        if (clk_period_cntr = clk_period_reg-1 and clk_period_cntr >= 3) then
+        if (clk_period_cntr = clk_period_reg-1 and clk_period_cntr >= 9) then
           clk_pulse         <= '1';
           clk_period_cntr   <= (others => '0');
         else
           clk_period_cntr   <= clk_period_cntr + 1;
-          if (clk_period_cntr = clk_period_reg/2-1 and clk_period_cntr >= 1) then
+          if (clk_period_cntr = clk_period_reg/2-1 and clk_period_cntr >= 4) then
             clk_pulse         <= '1';
           end if;
         end if;
@@ -165,7 +169,7 @@ begin
           st_iic_cntr   <= 0;
             -- check for s_xfer_tvalid signal
           if (s_xfer_tvalid = '1' and s_xfer_tready_sig = '1') then
-            -- leave this state only with IIC START request
+            -- check for commands
             case s_xfer_ttype is
               when C_TYPE_START =>
                 iic_master_state    <= XREPSTART_ST;
@@ -213,7 +217,7 @@ begin
             iic_master_state    <= XWRITE1_ST;
           end if;
         when XWRITE1_ST =>
-          -- checking the status of SCL because the SLAVE might be stretching the CLK
+          -- checking the status of SCL because the SLAVE might be stretching the SCL
           if (clk_pulse = '1' and iic_scl_r2 = '1') then
             st_iic_cntr   <= st_iic_cntr + 1;
             if (st_iic_cntr >= 8) then
@@ -267,25 +271,26 @@ begin
         when IDLE_ST =>
           iic_sda_o       <= '1';
           iic_scl_o       <= '1';
-          
+        
+        -- START condition
         when XSTART_ST =>
           if (clk_pulse = '1') then
             iic_sda_o       <= C_SDA_START(st_iic_cntr);
             iic_scl_o       <= C_SCL_START(st_iic_cntr);
           end if;
-          
+        -- REPEATED START condition
         when XREPSTART_ST =>
           if (clk_pulse = '1') then
             iic_sda_o       <= C_SDA_REPSTART(st_iic_cntr);
             iic_scl_o       <= C_SCL_REPSTART(st_iic_cntr);
           end if;
-          
+        -- END condition
         when XEND_ST =>
           if (clk_pulse = '1') then
             iic_sda_o       <= C_SDA_END(st_iic_cntr);
             iic_scl_o       <= C_SCL_END(st_iic_cntr);
           end if;
-          
+        -- WRITE transaction: SCL LOW 
         when XWRITE0_ST =>
           if (st_iic_cntr < 8) then -- send the data through SDA line
             iic_sda_o       <= st_write_data(st_iic_cntr);
@@ -295,6 +300,7 @@ begin
           if (clk_pulse = '1') then
             iic_scl_o       <= '1';
           end if;
+        -- WRITE transaction: SCL HIGH 
         when XWRITE1_ST =>
           if (clk_pulse = '1' and iic_scl_r2 = '1') then
             -- get the write ack result
@@ -304,6 +310,7 @@ begin
             iic_scl_o       <= '0';
           end if;
           
+        -- READ transaction: SCL LOW 
         when XREAD0_ST =>
           -- send acknowledge
           if (st_iic_cntr >= 8 and st_send_ack = '1') then
@@ -314,6 +321,7 @@ begin
           if (clk_pulse = '1') then
             iic_scl_o       <= '1';
           end if;
+        -- READ transaction: SCL HIGH 
         when XREAD1_ST =>
           if (clk_pulse = '1' and iic_scl_r2 = '1') then
             -- get the value of SDA
@@ -328,6 +336,18 @@ begin
         when others =>
           null;
       end case;
+    end if;
+  end process;
+  
+  -- Reports the status of active spi transfer
+  process (clock)
+  begin
+    if rising_edge(clock) then
+      if (iic_master_state = IDLE_ST) then 
+        m_xfer_tstatus  <= '0';
+      else
+        m_xfer_tstatus  <= '1';
+      end if;
     end if;
   end process;
   
