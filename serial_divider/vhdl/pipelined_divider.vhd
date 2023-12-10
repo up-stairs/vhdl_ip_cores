@@ -17,9 +17,9 @@ use ieee.math_real.all;
 entity pipelined_divider is
   generic (
     UW          : natural := 5; -- user width
-    DD          : natural := 7;  -- Replace with the actual dividend bit width
-    DR          : natural := 7;  -- Replace with the actual dividend bit width
-    FR          : natural := 0  -- Replace with the actual fractional part length
+    DD          : natural := 17;  -- Replace with the actual dividend bit width
+    DR          : natural := 17;  -- Replace with the actual dividend bit width
+    FR          : natural := 4  -- Replace with the actual fractional part length
   );
   port (
     clock         : in std_logic;                 -- Clock input
@@ -55,7 +55,7 @@ begin
   temp_valid(DD+FR)     <= valid_in;
   temp_user(DD+FR)      <= user_in;
   temp_dividend(DD+FR)  <= std_logic_vector(shift_left(resize(unsigned(dividend_in), DD+FR), FR));
-  temp_divisor(DD+FR)   <= std_logic_vector(shift_left(resize(unsigned(dividend_in), DR+DD+FR), DD+FR));
+  temp_divisor(DD+FR)   <= std_logic_vector(shift_left(resize(unsigned(divisor_in), DR+DD+FR), DD+FR));
   temp_quotent(DD+FR)   <= (others => '0');
 
   -- 
