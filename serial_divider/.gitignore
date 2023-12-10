@@ -1,0 +1,8 @@
+
+//exclude everything inside the qpsk folder
+/project/**
+
+//include the project file again
+!/project/*.xpr
+
+
