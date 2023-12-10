@@ -55,7 +55,7 @@ begin
   temp_valid(DD+FR)     <= valid_in;
   temp_user(DD+FR)      <= user_in;
   temp_dividend(DD+FR)  <= std_logic_vector(shift_left(resize(unsigned(dividend_in), DD+FR), FR));
-  temp_divisor(DD+FR)   <= std_logic_vector(shift_left(resize(unsigned(divisor_in), DR+DD+FR), DD+FR));
+  temp_divisor(DD+FR)   <= std_logic_vector(shift_left(resize(unsigned(divisor_in), DR+DD+FR), DD+FR-1));
   temp_quotent(DD+FR)   <= (others => '0');
 
   -- 
@@ -90,7 +90,7 @@ begin
 
   valid_out       <= temp_valid(0);
   user_out        <= temp_user(0);
-  remainder_out   <= temp_dividend(DD+FR)(remainder_out'range);
+  remainder_out   <= temp_dividend(0)(remainder_out'range);
   quotent_out     <= temp_quotent(0);
 
 end rtl;
