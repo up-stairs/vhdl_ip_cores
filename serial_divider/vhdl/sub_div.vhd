@@ -65,7 +65,7 @@ begin
           end if;
 
           temp_user       <= user_in;
-          temp_divisor    <= shift_left(shift_right(unsigned(divisor_in), 1), 1);
+          temp_divisor    <= resize(unsigned(divisor_in(divisor_in'left downto 1)), temp_divisor'length);
         end if;
       end if;
     end if;
