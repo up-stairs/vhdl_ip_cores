@@ -1,7 +1,8 @@
-/*
 
-!/hdl
-!/matlab
-!dvbs2_ldpc_decoder.xpr
-!readme.md
-!.gitignore
+//exclude everything inside the qpsk folder
+/qpsk/**
+
+//include the project file again
+!/qpsk/*.xpr
+
+
