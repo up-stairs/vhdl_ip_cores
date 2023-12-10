@@ -34,7 +34,7 @@ entity pipelined_divider is
     valid_out     : out std_logic;
     user_out      : out std_logic_vector(UW-1 downto 0);   --
     quotent_out   : out std_logic_vector(DD+FR-1 downto 0);  -- Output quotient
-    remainder_out : out std_logic_vector(DR+FR-1 downto 0)  -- Output remainder
+    remainder_out : out std_logic_vector(DD+FR-1 downto 0)  -- Output remainder
   );
 end pipelined_divider;
 
